@@ -40,7 +40,8 @@ export type Profile=typeof profiles[number];
 export function matchRecipe(recipe:Recipe,profile:Profile){
  const ingredients=recipe.ingredients.map(i=>i.name).join(' ');
  const foodGroups=groupedTags[recipe.id]?.['食材/菜品']||[];
- const conflicts=[...profile.exclude,...profile.allergies].filter(x=>foodGroups.includes(x)|| (x==='奶类'&&/奶|乳/.test(ingredients)));
+ const evidence:Record<string,RegExp>={'鱼类':/鱼/,'鸡肉':/鸡肉|鸡胸|鸡腿/,'牛肉':/牛肉/,'海鲜':/虾|蟹|贝|鱿鱼/,'奶类':/奶|乳/};
+ const conflicts=[...profile.exclude,...profile.allergies].filter(x=>foodGroups.includes(x)||!!evidence[x]?.test(ingredients));
  const tags=Object.values(groupedTags[recipe.id]||{}).flat();
  const matched=profile.preferences.filter(t=>tags.includes(t));
  return {conflicts,matched,score:matched.length,hasProfile:profile.id!=='none'};
